@@ -1,0 +1,220 @@
+---
+title: "DO Modification Report"
+author: "Jenna Rinde, Sarah Perry and Theodore M. Flynn"
+date: "8/27/2020"
+output: html_document
+---
+
+#Install Packages
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(dplyr)
+
+##Download data from EDI
+# Package ID: edi.276.1 Cataloging System:https://pasta.edirepository.org.
+# Data set title: Interagency Ecological Program: Discrete dissolved oxygen monitoring in the Stockton Deep Water Ship Channel, collected by the Environmental Monitoring Program, 1997-2018.
+# Data set creator:   Interagency Ecological Program (IEP) -  
+# Data set creator:  Sarah Lesmeister - California Department of Water Resources 
+# Data set creator:  Jenna Rinde - California Department of Water Resources 
+# Contact:  Sarah Lesmeister -  California Department of Water Resources  - sarah.lesmeister@water.ca.gov
+# Contact:  Jenna Rinde -  California Department of Water Resources  - jenna.rinde@water.ca.gov
+# Stylesheet v2.11 for metadata conversion into program: John H. Porter, Univ. Virginia, jporter@virginia.edu 
+
+inUrl1  <- "https://pasta.lternet.edu/package/data/eml/edi/276/1/e91e91c52a24d61002c8287ab30de3fc" 
+infile1 <- tempfile()
+try(download.file(inUrl1,infile1,method="curl"))
+if (is.na(file.size(infile1))) download.file(inUrl1,infile1,method="auto")
+
+                   
+ DO.EDI <-read_csv(infile1,header=F 
+          ,skip=1
+            ,sep=","  
+        , col.names=c(
+                    "Date",     
+                    "Time",     
+                    "Station",     
+                    "StationID",     
+                    "WTSurface",     
+                    "WTBottom",     
+                    "DOSurface",     
+                    "DOBottom",     
+                    "Objective",     
+                    "SpCndSurface",     
+                    "SpCndBottom",     
+                    "pHSurface",     
+                    "pHBottom",     
+                    "Flourescence_Turner",     
+                    "Flourescence_YSI",     
+                    "Nephelometry_Turner",     
+                    "Turbidity_YSI",     
+                    "Secchi",     
+                    "Microcystis"    ), check.names=TRUE)
+               
+unlink(infile1)
+		    
+# Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
+                                                   
+# attempting to convert DO.EDI$Date dateTime string to R date structure (date or POSIXct)                                
+tmpDateFormat<-"%m/%d/%Y"
+tmp1Date<-as.Date(DO.EDI$Date,format=tmpDateFormat)
+# Keep the new dates only if they all converted correctly
+if(length(tmp1Date) == length(tmp1Date[!is.na(tmp1Date)])){DO.EDI$Date <- tmp1Date } else {print("Date conversion failed for DO.EDI$Date. Please inspect the data and do the date conversion yourself.")}                                                                    
+rm(tmpDateFormat,tmp1Date) 
+if (class(DO.EDI$Station)!="factor") DO.EDI$Station<- as.factor(DO.EDI$Station)
+if (class(DO.EDI$StationID)!="factor") DO.EDI$StationID<- as.factor(DO.EDI$StationID)
+if (class(DO.EDI$WTSurface)=="factor") DO.EDI$WTSurface <-as.numeric(levels(DO.EDI$WTSurface))[as.integer(DO.EDI$WTSurface) ]               
+if (class(DO.EDI$WTSurface)=="character") DO.EDI$WTSurface <-as.numeric(DO.EDI$WTSurface)
+if (class(DO.EDI$WTBottom)=="factor") DO.EDI$WTBottom <-as.numeric(levels(DO.EDI$WTBottom))[as.integer(DO.EDI$WTBottom) ]               
+if (class(DO.EDI$WTBottom)=="character") DO.EDI$WTBottom <-as.numeric(DO.EDI$WTBottom)
+if (class(DO.EDI$DOSurface)=="factor") DO.EDI$DOSurface <-as.numeric(levels(DO.EDI$DOSurface))[as.integer(DO.EDI$DOSurface) ]               
+if (class(DO.EDI$DOSurface)=="character") DO.EDI$DOSurface <-as.numeric(DO.EDI$DOSurface)
+if (class(DO.EDI$DOBottom)=="factor") DO.EDI$DOBottom <-as.numeric(levels(DO.EDI$DOBottom))[as.integer(DO.EDI$DOBottom) ]               
+if (class(DO.EDI$DOBottom)=="character") DO.EDI$DOBottom <-as.numeric(DO.EDI$DOBottom)
+if (class(DO.EDI$Objective)=="factor") DO.EDI$Objective <-as.numeric(levels(DO.EDI$Objective))[as.integer(DO.EDI$Objective) ]               
+if (class(DO.EDI$Objective)=="character") DO.EDI$Objective <-as.numeric(DO.EDI$Objective)
+if (class(DO.EDI$SpCndSurface)=="factor") DO.EDI$SpCndSurface <-as.numeric(levels(DO.EDI$SpCndSurface))[as.integer(DO.EDI$SpCndSurface) ]               
+if (class(DO.EDI$SpCndSurface)=="character") DO.EDI$SpCndSurface <-as.numeric(DO.EDI$SpCndSurface)
+if (class(DO.EDI$SpCndBottom)=="factor") DO.EDI$SpCndBottom <-as.numeric(levels(DO.EDI$SpCndBottom))[as.integer(DO.EDI$SpCndBottom) ]               
+if (class(DO.EDI$SpCndBottom)=="character") DO.EDI$SpCndBottom <-as.numeric(DO.EDI$SpCndBottom)
+if (class(DO.EDI$pHSurface)=="factor") DO.EDI$pHSurface <-as.numeric(levels(DO.EDI$pHSurface))[as.integer(DO.EDI$pHSurface) ]               
+if (class(DO.EDI$pHSurface)=="character") DO.EDI$pHSurface <-as.numeric(DO.EDI$pHSurface)
+if (class(DO.EDI$pHBottom)=="factor") DO.EDI$pHBottom <-as.numeric(levels(DO.EDI$pHBottom))[as.integer(DO.EDI$pHBottom) ]               
+if (class(DO.EDI$pHBottom)=="character") DO.EDI$pHBottom <-as.numeric(DO.EDI$pHBottom)
+if (class(DO.EDI$Flourescence_Turner)=="factor") DO.EDI$Flourescence_Turner <-as.numeric(levels(DO.EDI$Flourescence_Turner))[as.integer(DO.EDI$Flourescence_Turner) ]               
+if (class(DO.EDI$Flourescence_Turner)=="character") DO.EDI$Flourescence_Turner <-as.numeric(DO.EDI$Flourescence_Turner)
+if (class(DO.EDI$Flourescence_YSI)=="factor") DO.EDI$Flourescence_YSI <-as.numeric(levels(DO.EDI$Flourescence_YSI))[as.integer(DO.EDI$Flourescence_YSI) ]               
+if (class(DO.EDI$Flourescence_YSI)=="character") DO.EDI$Flourescence_YSI <-as.numeric(DO.EDI$Flourescence_YSI)
+if (class(DO.EDI$Nephelometry_Turner)=="factor") DO.EDI$Nephelometry_Turner <-as.numeric(levels(DO.EDI$Nephelometry_Turner))[as.integer(DO.EDI$Nephelometry_Turner) ]               
+if (class(DO.EDI$Nephelometry_Turner)=="character") DO.EDI$Nephelometry_Turner <-as.numeric(DO.EDI$Nephelometry_Turner)
+if (class(DO.EDI$Turbidity_YSI)=="factor") DO.EDI$Turbidity_YSI <-as.numeric(levels(DO.EDI$Turbidity_YSI))[as.integer(DO.EDI$Turbidity_YSI) ]               
+if (class(DO.EDI$Turbidity_YSI)=="character") DO.EDI$Turbidity_YSI <-as.numeric(DO.EDI$Turbidity_YSI)
+if (class(DO.EDI$Secchi)=="factor") DO.EDI$Secchi <-as.numeric(levels(DO.EDI$Secchi))[as.integer(DO.EDI$Secchi) ]               
+if (class(DO.EDI$Secchi)=="character") DO.EDI$Secchi <-as.numeric(DO.EDI$Secchi)
+if (class(DO.EDI$Microcystis)!="factor") DO.EDI$Microcystis<- as.factor(DO.EDI$Microcystis)
+                
+# Convert Missing Values to NA for non-dates
+                
+DO.EDI$Station <- as.factor(ifelse((trimws(as.character(DO.EDI$Station))==trimws("NA")),NA,as.character(DO.EDI$Station)))
+DO.EDI$StationID <- as.factor(ifelse((trimws(as.character(DO.EDI$StationID))==trimws("NA")),NA,as.character(DO.EDI$StationID)))
+DO.EDI$WTSurface <- ifelse((trimws(as.character(DO.EDI$WTSurface))==trimws("NA")),NA,DO.EDI$WTSurface)               
+suppressWarnings(DO.EDI$WTSurface <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$WTSurface))==as.character(as.numeric("NA"))),NA,DO.EDI$WTSurface))
+DO.EDI$WTBottom <- ifelse((trimws(as.character(DO.EDI$WTBottom))==trimws("NA")),NA,DO.EDI$WTBottom)               
+suppressWarnings(DO.EDI$WTBottom <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$WTBottom))==as.character(as.numeric("NA"))),NA,DO.EDI$WTBottom))
+DO.EDI$DOSurface <- ifelse((trimws(as.character(DO.EDI$DOSurface))==trimws("NA")),NA,DO.EDI$DOSurface)               
+suppressWarnings(DO.EDI$DOSurface <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$DOSurface))==as.character(as.numeric("NA"))),NA,DO.EDI$DOSurface))
+DO.EDI$DOBottom <- ifelse((trimws(as.character(DO.EDI$DOBottom))==trimws("NA")),NA,DO.EDI$DOBottom)               
+suppressWarnings(DO.EDI$DOBottom <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$DOBottom))==as.character(as.numeric("NA"))),NA,DO.EDI$DOBottom))
+DO.EDI$Objective <- ifelse((trimws(as.character(DO.EDI$Objective))==trimws("NA")),NA,DO.EDI$Objective)               
+suppressWarnings(DO.EDI$Objective <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Objective))==as.character(as.numeric("NA"))),NA,DO.EDI$Objective))
+DO.EDI$SpCndSurface <- ifelse((trimws(as.character(DO.EDI$SpCndSurface))==trimws("NA")),NA,DO.EDI$SpCndSurface)               
+suppressWarnings(DO.EDI$SpCndSurface <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$SpCndSurface))==as.character(as.numeric("NA"))),NA,DO.EDI$SpCndSurface))
+DO.EDI$SpCndBottom <- ifelse((trimws(as.character(DO.EDI$SpCndBottom))==trimws("NA")),NA,DO.EDI$SpCndBottom)               
+suppressWarnings(DO.EDI$SpCndBottom <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$SpCndBottom))==as.character(as.numeric("NA"))),NA,DO.EDI$SpCndBottom))
+DO.EDI$pHSurface <- ifelse((trimws(as.character(DO.EDI$pHSurface))==trimws("NA")),NA,DO.EDI$pHSurface)               
+suppressWarnings(DO.EDI$pHSurface <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$pHSurface))==as.character(as.numeric("NA"))),NA,DO.EDI$pHSurface))
+DO.EDI$pHBottom <- ifelse((trimws(as.character(DO.EDI$pHBottom))==trimws("NA")),NA,DO.EDI$pHBottom)               
+suppressWarnings(DO.EDI$pHBottom <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$pHBottom))==as.character(as.numeric("NA"))),NA,DO.EDI$pHBottom))
+DO.EDI$Flourescence_Turner <- ifelse((trimws(as.character(DO.EDI$Flourescence_Turner))==trimws("NA")),NA,DO.EDI$Flourescence_Turner)               
+suppressWarnings(DO.EDI$Flourescence_Turner <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Flourescence_Turner))==as.character(as.numeric("NA"))),NA,DO.EDI$Flourescence_Turner))
+DO.EDI$Flourescence_YSI <- ifelse((trimws(as.character(DO.EDI$Flourescence_YSI))==trimws("NA")),NA,DO.EDI$Flourescence_YSI)               
+suppressWarnings(DO.EDI$Flourescence_YSI <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Flourescence_YSI))==as.character(as.numeric("NA"))),NA,DO.EDI$Flourescence_YSI))
+DO.EDI$Nephelometry_Turner <- ifelse((trimws(as.character(DO.EDI$Nephelometry_Turner))==trimws("NA")),NA,DO.EDI$Nephelometry_Turner)               
+suppressWarnings(DO.EDI$Nephelometry_Turner <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Nephelometry_Turner))==as.character(as.numeric("NA"))),NA,DO.EDI$Nephelometry_Turner))
+DO.EDI$Turbidity_YSI <- ifelse((trimws(as.character(DO.EDI$Turbidity_YSI))==trimws("NA")),NA,DO.EDI$Turbidity_YSI)               
+suppressWarnings(DO.EDI$Turbidity_YSI <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Turbidity_YSI))==as.character(as.numeric("NA"))),NA,DO.EDI$Turbidity_YSI))
+DO.EDI$Secchi <- ifelse((trimws(as.character(DO.EDI$Secchi))==trimws("NA")),NA,DO.EDI$Secchi)               
+suppressWarnings(DO.EDI$Secchi <- ifelse(!is.na(as.numeric("NA")) & (trimws(as.character(DO.EDI$Secchi))==as.character(as.numeric("NA"))),NA,DO.EDI$Secchi))
+DO.EDI$Microcystis <- as.factor(ifelse((trimws(as.character(DO.EDI$Microcystis))==trimws("NA")),NA,as.character(DO.EDI$Microcystis)))
+
+
+# Here is the structure of the input data frame:
+str(DO.EDI)                            
+attach(DO.EDI)                            
+# The analyses below are basic descriptions of the variables. After testing, they should be replaced.                 
+
+summary(Date)
+summary(Time)
+summary(Station)
+summary(StationID)
+summary(WTSurface)
+summary(WTBottom)
+summary(DOSurface)
+summary(DOBottom)
+summary(Objective)
+summary(SpCndSurface)
+summary(SpCndBottom)
+summary(pHSurface)
+summary(pHBottom)
+summary(Flourescence_Turner)
+summary(Flourescence_YSI)
+summary(Nephelometry_Turner)
+summary(Turbidity_YSI)
+summary(Secchi)
+summary(Microcystis) 
+                # Get more details on character variables
+                 
+summary(as.factor(DO.EDI$Station)) 
+summary(as.factor(DO.EDI$StationID)) 
+summary(as.factor(DO.EDI$Microcystis))
+detach(DO.EDI)               
+         
+
+inUrl2  <- "https://pasta.lternet.edu/package/data/eml/edi/276/1/172a4b6e794eb14e8e5ccb97fef435a1" 
+infile2 <- tempfile()
+try(download.file(inUrl2,infile2,method="curl"))
+if (is.na(file.size(infile2))) download.file(inUrl2,infile2,method="auto")
+
+                   
+ dt2 <-read.csv(infile2,header=F 
+          ,skip=1
+            ,sep=","  
+        , col.names=c(
+                    "Station",     
+                    "StationID",     
+                    "Latitude",     
+                    "Longitude"    ), check.names=TRUE)
+               
+unlink(infile2)
+		    
+# Fix any interval or ratio columns mistakenly read in as nominal and nominal columns read as numeric or dates read as strings
+                
+if (class(dt2$Station)!="factor") dt2$Station<- as.factor(dt2$Station)
+if (class(dt2$StationID)!="factor") dt2$StationID<- as.factor(dt2$StationID)
+if (class(dt2$Latitude)=="factor") dt2$Latitude <-as.numeric(levels(dt2$Latitude))[as.integer(dt2$Latitude) ]               
+if (class(dt2$Latitude)=="character") dt2$Latitude <-as.numeric(dt2$Latitude)
+if (class(dt2$Longitude)=="factor") dt2$Longitude <-as.numeric(levels(dt2$Longitude))[as.integer(dt2$Longitude) ]               
+if (class(dt2$Longitude)=="character") dt2$Longitude <-as.numeric(dt2$Longitude)
+                
+# Convert Missing Values to NA for non-dates
+                
+
+
+# Here is the structure of the input data frame:
+str(dt2)                            
+attach(dt2)                            
+# The analyses below are basic descriptions of the variables. After testing, they should be replaced.                 
+
+summary(Station)
+summary(StationID)
+summary(Latitude)
+summary(Longitude) 
+                # Get more details on character variables
+                 
+summary(as.factor(dt2$Station)) 
+summary(as.factor(dt2$StationID))
+detach(dt2)               
+        
+#remove extra column names
+DO.data<- DO.EDI %>% 
+  select(Date, Time, Station, StationID, DOSurface, DOBottom, Objective)
+
+#add new DO excurion column
+DO.data<- DO.data %>% 
+        mutate(DO.Surf.Excursion= if_else(DOSurface>Objective, FALSE, TRUE))
+glimpse(DO.data)
+
+DO.data %>% 
+        count(DO.Surf.Excursion)
+
+
