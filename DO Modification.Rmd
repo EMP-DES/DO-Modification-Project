@@ -16,7 +16,7 @@ library(dplyr)
 
 ```{r}
 #Import discrete data from EDI
-
+ 
 # Package ID: edi.276.2 Cataloging System:https://pasta.edirepository.org.
 # Data set title: Interagency Ecological Program: Discrete dissolved oxygen monitoring in the Stockton Deep Water Ship Channel, collected by the Environmental Monitoring Program, 1997-2018.
 # Data set creator:   Interagency Ecological Program (IEP) -  
