@@ -16,7 +16,7 @@ fp_DOdata <- 'S:/M & A BRANCH/Discrete EMP/Code/DO-average-calc/DO_Check.txt'
 
 # define sonde fp (shouldn't change)
 fp_sonde <- 'S:/OMBD/RRI.TXT'
-
+ 
 # determine how far back to read file (1 day = ~100 lines) 
 keepLines <- 1500 # lines
 numLines <- R.utils::countLines(fp_sonde)
