@@ -1,0 +1,83 @@
+```{r}
+#DO Stats
+#compute stats for DO study
+#output: .csv containing stats
+#questions: sarah.perry@water.ca.gov
+```
+
+```{r  message = FALSE}
+#import packages
+library(tidyverse)
+library(lubridate)
+```
+
+```{r  message = FALSE}
+#import files
+dfRRI <- read_csv('CM.RRI.data.csv')
+```
+
+```{r}
+#round dates
+dfRRI$date.time <- mdy_hm(dfRRI$date.time) #convert to datetime object
+dfRRI$Date <- format(as.Date(dfRRI$date.time, format = '%m/%d/%Y %H:%m:%s'), '%m/%d/%Y') #date col without time
+dfRRI$date.time <- floor_date(dfRRI$date.time, '15 minutes')
+
+#add season col
+dfRRI <- dfRRI %>%
+  mutate(Season =
+           case_when(
+             month == 3 | month == 4 | month == 5 ~ 'Spring',
+             month == 6 | month == 7 | month == 8 ~ 'Summer',
+             month == 9 | month == 10 | month == 11 ~ 'Fall',
+             month == 12 | month == 1 | month == 2 ~ 'Winter'
+             )
+         )
+
+#subset out DO
+dfRRI_DO <- subset(dfRRI, select = c(station, day, month, year, Date, Season, DO))
+
+#add summary stats by day
+dfRRI_DayStats <- dfRRI_DO %>%   
+  group_by(station, day, month, year, Date) %>%  
+  summarise(
+    Mean = mean(DO, na.rm = TRUE),
+    Median = median(DO, na.rm = TRUE),
+    `Std Dev` = sd(DO, na.rm = TRUE),
+    Max = max(DO, na.rm = TRUE),
+    Min = min(DO, na.rm = TRUE),
+    `Number of Datapoints` = n())
+
+#cleaup data
+dfRRI_DayStats <- dfRRI_DayStats %>% arrange(station, year, month)
+dfRRI_DayStats <- subset(dfRRI_DayStats, select = -c(month, year, day))
+dfRRI_DayStats$`Std Dev`[is.nan(dfRRI_DayStats$`Std Dev`)] <- NA
+dfRRI_DayStats$Mean[is.nan(dfRRI_DayStats$Mean)] <- NA
+dfRRI_DayStats$Median[is.nan(dfRRI_DayStats$Median)] <- NA
+dfRRI_DayStats$Max[is.infinite(dfRRI_DayStats$Max)] <- NA
+dfRRI_DayStats$Min[is.infinite(dfRRI_DayStats$Min)] <- NA
+
+#write file
+write_csv(dfRRI_DayStats, 'C:/R/DOStudy/DOStats_Day.csv')
+
+#add summary stats by season
+dfRRI_SeaStats <- dfRRI_DO %>%   
+  group_by(station, year, Season) %>%  
+  summarise(
+    Mean = mean(DO, na.rm = TRUE),
+    Median = median(DO, na.rm = TRUE),
+    `Std Dev` = sd(DO, na.rm = TRUE),
+    Max = max(DO, na.rm = TRUE),
+    Min = min(DO, na.rm = TRUE),
+    `Number of Datapoints` = n())
+
+#cleaup data
+dfRRI_SeaStats$`Std Dev`[is.nan(dfRRI_SeaStats$`Std Dev`)] <- NA
+dfRRI_SeaStats$Mean[is.nan(dfRRI_SeaStats$Mean)] <- NA
+dfRRI_SeaStats$Median[is.nan(dfRRI_SeaStats$Median)] <- NA
+dfRRI_SeaStats$Max[is.infinite(dfRRI_SeaStats$Max)] <- NA
+dfRRI_SeaStats$Min[is.infinite(dfRRI_SeaStats$Min)] <- NA
+
+#write
+write_csv(dfRRI_SeaStats, 'C:/R/DOStudy/DOStats_Season.csv')
+```
+
