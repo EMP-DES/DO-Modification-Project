@@ -7,7 +7,6 @@ output: html_document
 
 ```{r}
 #Install Packages
-
 library(tidyverse)
 library(readxl)
 library(lubridate)
@@ -184,14 +183,14 @@ try(download.file(inUrl2,infile2,method="curl"))
 if (is.na(file.size(infile2))) download.file(inUrl2,infile2,method="auto")
 
                    
- dt2 <-read.csv(infile2,header=F 
-          ,skip=1
-            ,sep=","  
-        , col.names=c(
-                    "Station",     
-                    "StationID",     
-                    "Latitude",     
-                    "Longitude"    ), check.names=TRUE)
+dt2 <-read.csv(infile2,header=F
+        ,skip=1
+          ,sep=","
+      , col.names=c(
+                  "Station",
+                  "StationID",
+                  "Latitude",
+                  "Longitude"    ), check.names=TRUE)
                
 unlink(infile2)
 		    
@@ -242,6 +241,7 @@ DO.data<- DO.data %>%
 # create summary df of excursion count
 DO.excurs <- DO.data %>%
   group_by(StationID, Year) %>%
+  na.omit() %>%
   summarize(
     Surf_Excursions = sum(DO.Surf.Excursion),
     Surf_No_Excursions = sum(!DO.Surf.Excursion),
@@ -251,8 +251,8 @@ DO.excurs <- DO.data %>%
   mutate(
     Surf_Perc_Excursions = round((Surf_Excursions/(Surf_Excursions+Surf_No_Excursions))*100),
     Bot_Perc_Excursions = round((Bot_Excursions/(Bot_Excursions+Bot_No_Excursions))*100)
-    
-  )
+  ) %>%
+  ungroup()
         
 #9/2 evening practice 
 excursions<- DO.data %>% 
